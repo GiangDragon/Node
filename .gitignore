@@ -1,0 +1,20 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual env
+.venv/
+venv/
+
+# OS / IDE
+.DS_Store
+.vscode/
+
+# Logs & temp
+*.log
+download_*
+
+# Storage (quan trọng cho DFS)
+Storage/Data/Chunks/
