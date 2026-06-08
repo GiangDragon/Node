@@ -17,6 +17,31 @@ def safe_filename(filename):
     return name
 
 
+def parse_chunk_name(chunk_name):
+    if "_chunk_" not in chunk_name:
+        return None
+
+    filename, chunk_index = chunk_name.rsplit("_chunk_", 1)
+    try:
+        chunk_index = int(chunk_index)
+    except ValueError:
+        return None
+
+    if chunk_index < 1:
+        return None
+
+    try:
+        filename = safe_filename(filename)
+    except HTTPException:
+        return None
+
+    return {
+        "filename": filename,
+        "chunk_index": chunk_index,
+        "chunk_name": chunk_name,
+    }
+
+
 @app.post("/store_chunk")
 async def store_chunk(
         file : UploadFile, 
@@ -43,6 +68,19 @@ def get_chunk(filename: str, chunk_index: int) :
         media_type="application/octet-stream",
         filename=f"{filename}_chunk_{chunk_index}"
     )
+
+@app.get("/chunks")
+def list_chunks():
+    chunks = []
+    for path in STORAGE_DIR.iterdir():
+        if not path.is_file():
+            continue
+
+        chunk = parse_chunk_name(path.name)
+        if chunk is not None:
+            chunks.append(chunk)
+
+    return {"chunks": chunks}
 
 @app.delete("/delete_chunk/{filename}/{chunk_index}")
 def delete_chunk(filename : str, chunk_index : int) :
